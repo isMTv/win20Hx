@@ -1,91 +1,91 @@
-# Разрешить запускать скрипты только в текущем сеансе PowerShell;
+# Р Р°Р·СЂРµС€РёС‚СЊ Р·Р°РїСѓСЃРєР°С‚СЊ СЃРєСЂРёРїС‚С‹ С‚РѕР»СЊРєРѕ РІ С‚РµРєСѓС‰РµРј СЃРµР°РЅСЃРµ PowerShell;
 # Set-ExecutionPolicy -ExecutionPolicy Bypass -Scope Process -Force
 
-# Выводим запрос на запуск скрипта от имени Админимтратора;
+# Р’С‹РІРѕРґРёРј Р·Р°РїСЂРѕСЃ РЅР° Р·Р°РїСѓСЃРє СЃРєСЂРёРїС‚Р° РѕС‚ РёРјРµРЅРё РђРґРјРёРЅРёРјС‚СЂР°С‚РѕСЂР°;
 if (!([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] "Administrator")) { Start-Process powershell "-NoProfile -ExecutionPolicy Bypass -File `"$PSCommandPath`"" -Verb RunAs; exit }
 
-# Инициализация меню;
+# РРЅРёС†РёР°Р»РёР·Р°С†РёСЏ РјРµРЅСЋ;
 function Show-Menu
 {
 	param (
-		[string]$Title = 'Скрипт настройки Windows 10 Build 2004 и 2009 ( 20H1 | 20H2 )'
+		[string]$Title = 'РЎРєСЂРёРїС‚ РЅР°СЃС‚СЂРѕР№РєРё Windows 10 Build 2004 Рё 2009 ( 20H1 | 20H2 )'
 	)
 	cls
 	Write-Host "================ $Title ================"
 	Write-Host "---"
-	Write-Host "1: Отключить службы;"
-	Write-Host "2: Отключить задачи диагностического отслеживания;"
-	Write-Host "3: Отключить компоненты Windows;"
-	Write-Host "4: Отключить обновления Windows;"
-	Write-Host "5: Удалить встроенные приложения из магазина Windows Store;"
-	Write-Host "6: Примеить Tweak's;"
-	Write-Host "7: Настроить систему для работы с SSD;"
-	Write-Host "8: Удалить OneDrive;"
-	Write-Host "9: Выполнить очистку папки WinSxS;"
-	Write-Host "10: Установить приложения с помощью WinGet (App Installer);"
+	Write-Host "1: РћС‚РєР»СЋС‡РёС‚СЊ СЃР»СѓР¶Р±С‹;"
+	Write-Host "2: РћС‚РєР»СЋС‡РёС‚СЊ Р·Р°РґР°С‡Рё РґРёР°РіРЅРѕСЃС‚РёС‡РµСЃРєРѕРіРѕ РѕС‚СЃР»РµР¶РёРІР°РЅРёСЏ;"
+	Write-Host "3: РћС‚РєР»СЋС‡РёС‚СЊ РєРѕРјРїРѕРЅРµРЅС‚С‹ Windows;"
+	Write-Host "4: РћС‚РєР»СЋС‡РёС‚СЊ РѕР±РЅРѕРІР»РµРЅРёСЏ Windows;"
+	Write-Host "5: РЈРґР°Р»РёС‚СЊ РІСЃС‚СЂРѕРµРЅРЅС‹Рµ РїСЂРёР»РѕР¶РµРЅРёСЏ РёР· РјР°РіР°Р·РёРЅР° Windows Store;"
+	Write-Host "6: РџСЂРёРјРµРёС‚СЊ Tweak's;"
+	Write-Host "7: РќР°СЃС‚СЂРѕРёС‚СЊ СЃРёСЃС‚РµРјСѓ РґР»СЏ СЂР°Р±РѕС‚С‹ СЃ SSD;"
+	Write-Host "8: РЈРґР°Р»РёС‚СЊ OneDrive;"
+	Write-Host "9: Р’С‹РїРѕР»РЅРёС‚СЊ РѕС‡РёСЃС‚РєСѓ РїР°РїРєРё WinSxS;"
+	Write-Host "10: РЈСЃС‚Р°РЅРѕРІРёС‚СЊ РїСЂРёР»РѕР¶РµРЅРёСЏ СЃ РїРѕРјРѕС‰СЊСЋ WinGet (App Installer);"
 	Write-Host "---"
-	Write-Host "Q: Нажмите 'Q' чтобы выйти."
+	Write-Host "Q: РќР°Р¶РјРёС‚Рµ 'Q' С‡С‚РѕР±С‹ РІС‹Р№С‚Рё."
 }
 
-# Запуск наборов функций;
+# Р—Р°РїСѓСЃРє РЅР°Р±РѕСЂРѕРІ С„СѓРЅРєС†РёР№;
 #
-# Отключение служб;
+# РћС‚РєР»СЋС‡РµРЅРёРµ СЃР»СѓР¶Р±;
 Function f_disable_services {
 	$services = @(
-		# Функциональные возможности для подключенных пользователей и телеметрия
+		# Р¤СѓРЅРєС†РёРѕРЅР°Р»СЊРЅС‹Рµ РІРѕР·РјРѕР¶РЅРѕСЃС‚Рё РґР»СЏ РїРѕРґРєР»СЋС‡РµРЅРЅС‹С… РїРѕР»СЊР·РѕРІР°С‚РµР»РµР№ Рё С‚РµР»РµРјРµС‚СЂРёСЏ
 		"DiagTrack"
-		# Служба маршрутизации push-сообщений на основе протокола WAP
+		# РЎР»СѓР¶Р±Р° РјР°СЂС€СЂСѓС‚РёР·Р°С†РёРё push-СЃРѕРѕР±С‰РµРЅРёР№ РЅР° РѕСЃРЅРѕРІРµ РїСЂРѕС‚РѕРєРѕР»Р° WAP
 		"dmwappushservice"
-		# Стандартная служба сборщика центра диагностики Microsoft
+		# РЎС‚Р°РЅРґР°СЂС‚РЅР°СЏ СЃР»СѓР¶Р±Р° СЃР±РѕСЂС‰РёРєР° С†РµРЅС‚СЂР° РґРёР°РіРЅРѕСЃС‚РёРєРё Microsoft
 		"diagnosticshub.standardcollector.service"
-		# Служба антивирусной программы Microsoft Defender
+		# РЎР»СѓР¶Р±Р° Р°РЅС‚РёРІРёСЂСѓСЃРЅРѕР№ РїСЂРѕРіСЂР°РјРјС‹ Microsoft Defender
 		"WinDefend"
-		# Служба оркестратора обновлений
+		# РЎР»СѓР¶Р±Р° РѕСЂРєРµСЃС‚СЂР°С‚РѕСЂР° РѕР±РЅРѕРІР»РµРЅРёР№
 		"UsoSvc"
-		# Служба сенсорной клавиатуры и панели рукописного ввода
+		# РЎР»СѓР¶Р±Р° СЃРµРЅСЃРѕСЂРЅРѕР№ РєР»Р°РІРёР°С‚СѓСЂС‹ Рё РїР°РЅРµР»Рё СЂСѓРєРѕРїРёСЃРЅРѕРіРѕ РІРІРѕРґР°
 		"TabletInputService"
-		# Служба управления радио
+		# РЎР»СѓР¶Р±Р° СѓРїСЂР°РІР»РµРЅРёСЏ СЂР°РґРёРѕ
 		"RmSvc"
 	)
 	ForEach ($service in $services) {
-		echo "Остановка службы: $service"
+		echo "РћСЃС‚Р°РЅРѕРІРєР° СЃР»СѓР¶Р±С‹: $service"
 		Get-Service -Name $service | Stop-Service -Force
-		echo "Отключение службы: $service"
+		echo "РћС‚РєР»СЋС‡РµРЅРёРµ СЃР»СѓР¶Р±С‹: $service"
 		Get-Service -Name $service | Set-Service -StartupType Disabled
 	}
 }
 
-# Отключить задачи диагностического отслеживания;
+# РћС‚РєР»СЋС‡РёС‚СЊ Р·Р°РґР°С‡Рё РґРёР°РіРЅРѕСЃС‚РёС‡РµСЃРєРѕРіРѕ РѕС‚СЃР»РµР¶РёРІР°РЅРёСЏ;
 function f_disable_scheduledtasks {
 	$ScheduledTaskList = @(
-		# Собирает телеметрические данные программы при участии в Программе улучшения качества программного обеспечения Майкрософт
+		# РЎРѕР±РёСЂР°РµС‚ С‚РµР»РµРјРµС‚СЂРёС‡РµСЃРєРёРµ РґР°РЅРЅС‹Рµ РїСЂРѕРіСЂР°РјРјС‹ РїСЂРё СѓС‡Р°СЃС‚РёРё РІ РџСЂРѕРіСЂР°РјРјРµ СѓР»СѓС‡С€РµРЅРёСЏ РєР°С‡РµСЃС‚РІР° РїСЂРѕРіСЂР°РјРјРЅРѕРіРѕ РѕР±РµСЃРїРµС‡РµРЅРёСЏ РњР°Р№РєСЂРѕСЃРѕС„С‚
 		"Microsoft Compatibility Appraiser",
-		# Сбор телеметрических данных программы при участии в программе улучшения качества ПО
+		# РЎР±РѕСЂ С‚РµР»РµРјРµС‚СЂРёС‡РµСЃРєРёС… РґР°РЅРЅС‹С… РїСЂРѕРіСЂР°РјРјС‹ РїСЂРё СѓС‡Р°СЃС‚РёРё РІ РїСЂРѕРіСЂР°РјРјРµ СѓР»СѓС‡С€РµРЅРёСЏ РєР°С‡РµСЃС‚РІР° РџРћ
 		"ProgramDataUpdater",
-		# Эта задача собирает и загружает данные SQM при участии в программе улучшения качества программного обеспечения
+		# Р­С‚Р° Р·Р°РґР°С‡Р° СЃРѕР±РёСЂР°РµС‚ Рё Р·Р°РіСЂСѓР¶Р°РµС‚ РґР°РЅРЅС‹Рµ SQM РїСЂРё СѓС‡Р°СЃС‚РёРё РІ РїСЂРѕРіСЂР°РјРјРµ СѓР»СѓС‡С€РµРЅРёСЏ РєР°С‡РµСЃС‚РІР° РїСЂРѕРіСЂР°РјРјРЅРѕРіРѕ РѕР±РµСЃРїРµС‡РµРЅРёСЏ
 		"Proxy",
-		# Если пользователь изъявил желание участвовать в программе по улучшению качества программного обеспечения Windows, эта задача будет собирать и отправлять сведения о работе программного обеспечения в Майкрософт
+		# Р•СЃР»Рё РїРѕР»СЊР·РѕРІР°С‚РµР»СЊ РёР·СЉСЏРІРёР» Р¶РµР»Р°РЅРёРµ СѓС‡Р°СЃС‚РІРѕРІР°С‚СЊ РІ РїСЂРѕРіСЂР°РјРјРµ РїРѕ СѓР»СѓС‡С€РµРЅРёСЋ РєР°С‡РµСЃС‚РІР° РїСЂРѕРіСЂР°РјРјРЅРѕРіРѕ РѕР±РµСЃРїРµС‡РµРЅРёСЏ Windows, СЌС‚Р° Р·Р°РґР°С‡Р° Р±СѓРґРµС‚ СЃРѕР±РёСЂР°С‚СЊ Рё РѕС‚РїСЂР°РІР»СЏС‚СЊ СЃРІРµРґРµРЅРёСЏ Рѕ СЂР°Р±РѕС‚Рµ РїСЂРѕРіСЂР°РјРјРЅРѕРіРѕ РѕР±РµСЃРїРµС‡РµРЅРёСЏ РІ РњР°Р№РєСЂРѕСЃРѕС„С‚
 		"Consolidator",
-		# При выполнении задачи программы улучшения качества ПО шины USB (USB CEIP) осуществляется сбор статистических данных об использовании универсальной последовательной шины USB и с ведений о компьютере, которые направляются инженерной группе Майкрософт по вопросам подключения устройств в Windows
+		# РџСЂРё РІС‹РїРѕР»РЅРµРЅРёРё Р·Р°РґР°С‡Рё РїСЂРѕРіСЂР°РјРјС‹ СѓР»СѓС‡С€РµРЅРёСЏ РєР°С‡РµСЃС‚РІР° РџРћ С€РёРЅС‹ USB (USB CEIP) РѕСЃСѓС‰РµСЃС‚РІР»СЏРµС‚СЃСЏ СЃР±РѕСЂ СЃС‚Р°С‚РёСЃС‚РёС‡РµСЃРєРёС… РґР°РЅРЅС‹С… РѕР± РёСЃРїРѕР»СЊР·РѕРІР°РЅРёРё СѓРЅРёРІРµСЂСЃР°Р»СЊРЅРѕР№ РїРѕСЃР»РµРґРѕРІР°С‚РµР»СЊРЅРѕР№ С€РёРЅС‹ USB Рё СЃ РІРµРґРµРЅРёР№ Рѕ РєРѕРјРїСЊСЋС‚РµСЂРµ, РєРѕС‚РѕСЂС‹Рµ РЅР°РїСЂР°РІР»СЏСЋС‚СЃСЏ РёРЅР¶РµРЅРµСЂРЅРѕР№ РіСЂСѓРїРїРµ РњР°Р№РєСЂРѕСЃРѕС„С‚ РїРѕ РІРѕРїСЂРѕСЃР°Рј РїРѕРґРєР»СЋС‡РµРЅРёСЏ СѓСЃС‚СЂРѕР№СЃС‚РІ РІ Windows
 		"UsbCeip",
-		# Для пользователей, участвующих в программе контроля качества программного обеспечения, служба диагностики дисков Windows предоставляет общие сведения о дисках и системе в корпорацию Майкрософт
+		# Р”Р»СЏ РїРѕР»СЊР·РѕРІР°С‚РµР»РµР№, СѓС‡Р°СЃС‚РІСѓСЋС‰РёС… РІ РїСЂРѕРіСЂР°РјРјРµ РєРѕРЅС‚СЂРѕР»СЏ РєР°С‡РµСЃС‚РІР° РїСЂРѕРіСЂР°РјРјРЅРѕРіРѕ РѕР±РµСЃРїРµС‡РµРЅРёСЏ, СЃР»СѓР¶Р±Р° РґРёР°РіРЅРѕСЃС‚РёРєРё РґРёСЃРєРѕРІ Windows РїСЂРµРґРѕСЃС‚Р°РІР»СЏРµС‚ РѕР±С‰РёРµ СЃРІРµРґРµРЅРёСЏ Рѕ РґРёСЃРєР°С… Рё СЃРёСЃС‚РµРјРµ РІ РєРѕСЂРїРѕСЂР°С†РёСЋ РњР°Р№РєСЂРѕСЃРѕС„С‚
 		"Microsoft-Windows-DiskDiagnosticDataCollector",
-		# Защищает файлы пользователя от случайной потери за счет их копирования в резервное расположение, когда система находится в автоматическом режиме
+		# Р—Р°С‰РёС‰Р°РµС‚ С„Р°Р№Р»С‹ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ РѕС‚ СЃР»СѓС‡Р°Р№РЅРѕР№ РїРѕС‚РµСЂРё Р·Р° СЃС‡РµС‚ РёС… РєРѕРїРёСЂРѕРІР°РЅРёСЏ РІ СЂРµР·РµСЂРІРЅРѕРµ СЂР°СЃРїРѕР»РѕР¶РµРЅРёРµ, РєРѕРіРґР° СЃРёСЃС‚РµРјР° РЅР°С…РѕРґРёС‚СЃСЏ РІ Р°РІС‚РѕРјР°С‚РёС‡РµСЃРєРѕРј СЂРµР¶РёРјРµ
 		"File History (maintenance mode)",
-		# Измеряет быстродействие и возможности системы
+		# РР·РјРµСЂСЏРµС‚ Р±С‹СЃС‚СЂРѕРґРµР№СЃС‚РІРёРµ Рё РІРѕР·РјРѕР¶РЅРѕСЃС‚Рё СЃРёСЃС‚РµРјС‹
 		"WinSAT",
-		# Эта задача показывает различные тосты (всплывающие уведомления) приложения "Карты"
+		# Р­С‚Р° Р·Р°РґР°С‡Р° РїРѕРєР°Р·С‹РІР°РµС‚ СЂР°Р·Р»РёС‡РЅС‹Рµ С‚РѕСЃС‚С‹ (РІСЃРїР»С‹РІР°СЋС‰РёРµ СѓРІРµРґРѕРјР»РµРЅРёСЏ) РїСЂРёР»РѕР¶РµРЅРёСЏ "РљР°СЂС‚С‹"
 		"MapsToastTask",
-		# Эта задача проверяет наличие обновлений для карт, загруженных для автономного использования
+		# Р­С‚Р° Р·Р°РґР°С‡Р° РїСЂРѕРІРµСЂСЏРµС‚ РЅР°Р»РёС‡РёРµ РѕР±РЅРѕРІР»РµРЅРёР№ РґР»СЏ РєР°СЂС‚, Р·Р°РіСЂСѓР¶РµРЅРЅС‹С… РґР»СЏ Р°РІС‚РѕРЅРѕРјРЅРѕРіРѕ РёСЃРїРѕР»СЊР·РѕРІР°РЅРёСЏ
 		"MapsUpdateTask",
-		# Инициализация контроля и применения правил семейной безопасности
+		# РРЅРёС†РёР°Р»РёР·Р°С†РёСЏ РєРѕРЅС‚СЂРѕР»СЏ Рё РїСЂРёРјРµРЅРµРЅРёСЏ РїСЂР°РІРёР» СЃРµРјРµР№РЅРѕР№ Р±РµР·РѕРїР°СЃРЅРѕСЃС‚Рё
 		"FamilySafetyMonitor",
-		# Синхронизирует последние параметры со службой функций семьи учетных записей Майкрософт
+		# РЎРёРЅС…СЂРѕРЅРёР·РёСЂСѓРµС‚ РїРѕСЃР»РµРґРЅРёРµ РїР°СЂР°РјРµС‚СЂС‹ СЃРѕ СЃР»СѓР¶Р±РѕР№ С„СѓРЅРєС†РёР№ СЃРµРјСЊРё СѓС‡РµС‚РЅС‹С… Р·Р°РїРёСЃРµР№ РњР°Р№РєСЂРѕСЃРѕС„С‚
 		"FamilySafetyRefreshTask",
 		# XblGameSave Standby Task
 		"XblGameSaveTask"
 	)
-	# Если устройство не является ноутбуком, отключить также и FODCleanupTask
+	# Р•СЃР»Рё СѓСЃС‚СЂРѕР№СЃС‚РІРѕ РЅРµ СЏРІР»СЏРµС‚СЃСЏ РЅРѕСѓС‚Р±СѓРєРѕРј, РѕС‚РєР»СЋС‡РёС‚СЊ С‚Р°РєР¶Рµ Рё FODCleanupTask
 	if ((Get-CimInstance -ClassName Win32_ComputerSystem).PCSystemType -ne 2) {
 		# Windows Hello
 		$ScheduledTaskList += "FODCleanupTask"
@@ -93,229 +93,232 @@ function f_disable_scheduledtasks {
 	Get-ScheduledTask -TaskName $ScheduledTaskList | Disable-ScheduledTask
 }
 
-# Отключить компоненты Windows;
+# РћС‚РєР»СЋС‡РёС‚СЊ РєРѕРјРїРѕРЅРµРЅС‚С‹ Windows;
 Function f_disable_components {
 	$WindowsOptionalFeatures = @(
-		# Компоненты прежних версий
+		# РљРѕРјРїРѕРЅРµРЅС‚С‹ РїСЂРµР¶РЅРёС… РІРµСЂСЃРёР№
 		"LegacyComponents"
-		# Компоненты работы с мультимедиа
+		# РљРѕРјРїРѕРЅРµРЅС‚С‹ СЂР°Р±РѕС‚С‹ СЃ РјСѓР»СЊС‚РёРјРµРґРёР°
 		"MediaPlayback"
-		# Средство записи XPS-документов (Microsoft)
+		# РЎСЂРµРґСЃС‚РІРѕ Р·Р°РїРёСЃРё XPS-РґРѕРєСѓРјРµРЅС‚РѕРІ (Microsoft)
 		"Printing-XPSServices-Features"
-		# Клиент рабочих папок
+		# РљР»РёРµРЅС‚ СЂР°Р±РѕС‡РёС… РїР°РїРѕРє
 		"WorkFolders-Client"
 	)
 	Disable-WindowsOptionalFeature -Online -FeatureName $WindowsOptionalFeatures -NoRestart
 }
 
-# Отключить обновления Windows;
+# РћС‚РєР»СЋС‡РёС‚СЊ РѕР±РЅРѕРІР»РµРЅРёСЏ Windows;
 Function f_disable_winupdate {
 	$services = @(
-		# Служба оркестратора обновлений
+		# РЎР»СѓР¶Р±Р° РѕСЂРєРµСЃС‚СЂР°С‚РѕСЂР° РѕР±РЅРѕРІР»РµРЅРёР№
 		"UsoSvc"
-		# Центр обновления Windows
+		# Р¦РµРЅС‚СЂ РѕР±РЅРѕРІР»РµРЅРёСЏ Windows
 		"wuauserv"
 	)
 	ForEach ($service in $services) {
-		echo "Остановка службы: $service"
+		echo "РћСЃС‚Р°РЅРѕРІРєР° СЃР»СѓР¶Р±С‹: $service"
 		Get-Service -Name $service | Stop-Service -Force
-		echo "Отключение службы: $service"
+		echo "РћС‚РєР»СЋС‡РµРЅРёРµ СЃР»СѓР¶Р±С‹: $service"
 		Get-Service -Name $service | Set-Service -StartupType Disabled
 	}
 	$ScheduledTaskList = @(
 		# WindowsUpdate
 		"Scheduled Start"
 		# UpdateOrchestrator
-		#"Schedule Scan"
-		#"Schedule Scan Static Task"
+		"Schedule Scan"
+		"Schedule Scan Static Task"
 	)
+	TAKEOWN /F C:\Windows\System32\Tasks\Microsoft\Windows\UpdateOrchestrator /A /R
+	ICACLS "C:\Windows\System32\Tasks\Microsoft\Windows\UpdateOrchestrator\Schedule Scan" /grant:r РђРґРјРёРЅРёСЃС‚СЂР°С‚РѕСЂС‹:M
+	ICACLS "C:\Windows\System32\Tasks\Microsoft\Windows\UpdateOrchestrator\Schedule Scan Static Task" /grant:r РђРґРјРёРЅРёСЃС‚СЂР°С‚РѕСЂС‹:M
 	Get-ScheduledTask -TaskName $ScheduledTaskList | Disable-ScheduledTask
 	
 }
 
-# Удалить встроенные приложения из магазина Windows Store;
+# РЈРґР°Р»РёС‚СЊ РІСЃС‚СЂРѕРµРЅРЅС‹Рµ РїСЂРёР»РѕР¶РµРЅРёСЏ РёР· РјР°РіР°Р·РёРЅР° Windows Store;
 Function f_remove_builtinapps {
 	# Get-AppxProvisionedPackage -Online | Select DisplayName, PackageName
 	# Get-AppxPackage | Select Name, PackageFullName
 	$apps = @(
 		# Cortana
 		"Microsoft.549981C3F5F10"
-		# Техническая поддержка
+		# РўРµС…РЅРёС‡РµСЃРєР°СЏ РїРѕРґРґРµСЂР¶РєР°
 		"Microsoft.GetHelp"
-		# Советы Майкрософт
+		# РЎРѕРІРµС‚С‹ РњР°Р№РєСЂРѕСЃРѕС„С‚
 		"Microsoft.Getstarted"
-		# Средство просмотра смешанной реальности
+		# РЎСЂРµРґСЃС‚РІРѕ РїСЂРѕСЃРјРѕС‚СЂР° СЃРјРµС€Р°РЅРЅРѕР№ СЂРµР°Р»СЊРЅРѕСЃС‚Рё
 		"Microsoft.Microsoft3DViewer"
 		# Office
 		"Microsoft.MicrosoftOfficeHub"
-		# Сбор классификации Майкрософт
+		# РЎР±РѕСЂ РєР»Р°СЃСЃРёС„РёРєР°С†РёРё РњР°Р№РєСЂРѕСЃРѕС„С‚
 		"Microsoft.MicrosoftSolitaireCollection"
-		# Портал смешанной реальности
+		# РџРѕСЂС‚Р°Р» СЃРјРµС€Р°РЅРЅРѕР№ СЂРµР°Р»СЊРЅРѕСЃС‚Рё
 		"Microsoft.MixedReality.Portal"
 		# Paint 3D
 		"Microsoft.MSPaint"
-		# OneNote для Windows 10
+		# OneNote РґР»СЏ Windows 10
 		"Microsoft.Office.OneNote"
-		# Люди (Майкрософт)
+		# Р›СЋРґРё (РњР°Р№РєСЂРѕСЃРѕС„С‚)
 		"Microsoft.People"
 		# Skype
 		"Microsoft.SkypeApp"
-		# Фотографии (Майкрософт)
+		# Р¤РѕС‚РѕРіСЂР°С„РёРё (РњР°Р№РєСЂРѕСЃРѕС„С‚)
 		"Microsoft.Windows.Photos"
-		# Камера Windows
+		# РљР°РјРµСЂР° Windows
 		"Microsoft.WindowsCamera"
-		# Центр отзывов
+		# Р¦РµРЅС‚СЂ РѕС‚Р·С‹РІРѕРІ
 		"Microsoft.WindowsFeedbackHub"
-		# Карты Windows
+		# РљР°СЂС‚С‹ Windows
 		"Microsoft.WindowsMaps"
-		# Взаимодействие xbox Live
+		# Р’Р·Р°РёРјРѕРґРµР№СЃС‚РІРёРµ xbox Live
 		"Microsoft.Xbox.TCUI"
-		# Компаньон консоли Xbox
+		# РљРѕРјРїР°РЅСЊРѕРЅ РєРѕРЅСЃРѕР»Рё Xbox
 		"Microsoft.XboxApp"
-		# Подключаемый модуль Xbox
+		# РџРѕРґРєР»СЋС‡Р°РµРјС‹Р№ РјРѕРґСѓР»СЊ Xbox
 		"Microsoft.XboxGameOverlay"
-		# Меню игры Xbox
+		# РњРµРЅСЋ РёРіСЂС‹ Xbox
 		"Microsoft.XboxGamingOverlay"
-		# Поставщик удостоверений Xbox
+		# РџРѕСЃС‚Р°РІС‰РёРє СѓРґРѕСЃС‚РѕРІРµСЂРµРЅРёР№ Xbox
 		"Microsoft.XboxIdentityProvider"
 		# XboxSpeechToTextOverlay
 		"Microsoft.XboxSpeechToTextOverlay"
-		# Музыка Groove
+		# РњСѓР·С‹РєР° Groove
 		"Microsoft.ZuneMusic"
-		# Кино и ТВ
+		# РљРёРЅРѕ Рё РўР’
 		"Microsoft.ZuneVideo"
-		# Яндекс.Музыка
+		# РЇРЅРґРµРєСЃ.РњСѓР·С‹РєР°
 		"A025C540.Yandex.Music"
 	)
 	ForEach ($app in $apps) {
 		$ProvisionedPackages = Get-AppxProvisionedPackage -Online | Where-Object {$_.DisplayName -eq $app}
 		if ($ProvisionedPackages -ne $null) {
-			echo "Удаление подготовительного пакета: $app"
+			echo "РЈРґР°Р»РµРЅРёРµ РїРѕРґРіРѕС‚РѕРІРёС‚РµР»СЊРЅРѕРіРѕ РїР°РєРµС‚Р°: $app"
 			ForEach  ($ProvisionedPackage in $ProvisionedPackages) {
 				Remove-AppxProvisionedPackage -Online -PackageName $ProvisionedPackage.PackageName
 			}
 		}
 		else {
-			echo "Не удалось найти подготовительный пакет: $app"
+			echo "РќРµ СѓРґР°Р»РѕСЃСЊ РЅР°Р№С‚Рё РїРѕРґРіРѕС‚РѕРІРёС‚РµР»СЊРЅС‹Р№ РїР°РєРµС‚: $app"
 		}
 		$Packages = Get-AppxPackage | Where-Object {$_.Name -eq $app}
 		if ($Packages -ne $null) {
-			echo "Удаление пакета: $app"
+			echo "РЈРґР°Р»РµРЅРёРµ РїР°РєРµС‚Р°: $app"
 			ForEach ($Package in $Packages) {
 				Remove-AppxPackage -AllUsers -Package $Package.PackageFullName
 			}
 		}
 		else {
-			echo "Не удалось найти пакет: $app"
+			echo "РќРµ СѓРґР°Р»РѕСЃСЊ РЅР°Р№С‚Рё РїР°РєРµС‚: $app"
 		}
 	}
 }
 
-# Примеить Tweak's
+# РџСЂРёРјРµРёС‚СЊ Tweak's
 Function f_tweaks {
-	# Установить метод ввода по умолчанию на английский язык
+	# РЈСЃС‚Р°РЅРѕРІРёС‚СЊ РјРµС‚РѕРґ РІРІРѕРґР° РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ РЅР° Р°РЅРіР»РёР№СЃРєРёР№ СЏР·С‹Рє
 	Set-WinDefaultInputMethodOverride "0409:00000409"
-	# Отобразить "Этот компьютер" на рабочем столе (только для текущего пользователя)
+	# РћС‚РѕР±СЂР°Р·РёС‚СЊ "Р­С‚РѕС‚ РєРѕРјРїСЊСЋС‚РµСЂ" РЅР° СЂР°Р±РѕС‡РµРј СЃС‚РѕР»Рµ (С‚РѕР»СЊРєРѕ РґР»СЏ С‚РµРєСѓС‰РµРіРѕ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ)
 	Set-ItemProperty -Path 'HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\NewStartPanel' -Name '{20D04FE0-3AEA-1069-A2D8-08002B30309D}' -Type DWord 0
-	# Отобразить "Документы пользователя" на рабочем столе (только для текущего пользователя)
+	# РћС‚РѕР±СЂР°Р·РёС‚СЊ "Р”РѕРєСѓРјРµРЅС‚С‹ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ" РЅР° СЂР°Р±РѕС‡РµРј СЃС‚РѕР»Рµ (С‚РѕР»СЊРєРѕ РґР»СЏ С‚РµРєСѓС‰РµРіРѕ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ)
 	Set-ItemProperty -Path 'HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\NewStartPanel' -Name '{59031a47-3f72-44a7-89c5-5595fe6b30ee}' -Type DWord 0
-	# Открывать проводник для: "Этот компьютер" (только для текущего пользователя)
+	# РћС‚РєСЂС‹РІР°С‚СЊ РїСЂРѕРІРѕРґРЅРёРє РґР»СЏ: "Р­С‚РѕС‚ РєРѕРјРїСЊСЋС‚РµСЂ" (С‚РѕР»СЊРєРѕ РґР»СЏ С‚РµРєСѓС‰РµРіРѕ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ)
 	Set-ItemProperty -Path 'HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced' -Name 'LaunchTo' -Type DWord 1
-	# Не показывать кнопку Кортаны на панели задач (только для текущего пользователя)
+	# РќРµ РїРѕРєР°Р·С‹РІР°С‚СЊ РєРЅРѕРїРєСѓ РљРѕСЂС‚Р°РЅС‹ РЅР° РїР°РЅРµР»Рё Р·Р°РґР°С‡ (С‚РѕР»СЊРєРѕ РґР»СЏ С‚РµРєСѓС‰РµРіРѕ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ)
 	Set-ItemProperty -Path 'HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced' -Name 'ShowCortanaButton' -Type DWord 0
-	# Не показывать недавно используемые папки на панели быстрого доступа (только для текущего пользователя)
+	# РќРµ РїРѕРєР°Р·С‹РІР°С‚СЊ РЅРµРґР°РІРЅРѕ РёСЃРїРѕР»СЊР·СѓРµРјС‹Рµ РїР°РїРєРё РЅР° РїР°РЅРµР»Рё Р±С‹СЃС‚СЂРѕРіРѕ РґРѕСЃС‚СѓРїР° (С‚РѕР»СЊРєРѕ РґР»СЏ С‚РµРєСѓС‰РµРіРѕ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ)
 	Set-ItemProperty -Path 'HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer' -Name 'ShowFrequent' -Type DWord 0
-	# Не показывать недавно использовавшиеся файлы на панели быстрого доступа (только для текущего пользователя)
+	# РќРµ РїРѕРєР°Р·С‹РІР°С‚СЊ РЅРµРґР°РІРЅРѕ РёСЃРїРѕР»СЊР·РѕРІР°РІС€РёРµСЃСЏ С„Р°Р№Р»С‹ РЅР° РїР°РЅРµР»Рё Р±С‹СЃС‚СЂРѕРіРѕ РґРѕСЃС‚СѓРїР° (С‚РѕР»СЊРєРѕ РґР»СЏ С‚РµРєСѓС‰РµРіРѕ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ)
 	Set-ItemProperty -Path 'HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer' -Name 'ShowRecent' -Type DWord 0
-	# Не использовать автозапуск для всех носителей и устройств (только для текущего пользователя)
+	# РќРµ РёСЃРїРѕР»СЊР·РѕРІР°С‚СЊ Р°РІС‚РѕР·Р°РїСѓСЃРє РґР»СЏ РІСЃРµС… РЅРѕСЃРёС‚РµР»РµР№ Рё СѓСЃС‚СЂРѕР№СЃС‚РІ (С‚РѕР»СЊРєРѕ РґР»СЏ С‚РµРєСѓС‰РµРіРѕ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ)
 	Set-ItemProperty -Path 'HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\AutoplayHandlers' -Name 'DisableAutoplay' -Type DWord 1
-	# Не разрешать приложениям на других устройствах запускать приложения и отправлять сообщения на этом устройстве и наоборот (только для текущего пользователя)
+	# РќРµ СЂР°Р·СЂРµС€Р°С‚СЊ РїСЂРёР»РѕР¶РµРЅРёСЏРј РЅР° РґСЂСѓРіРёС… СѓСЃС‚СЂРѕР№СЃС‚РІР°С… Р·Р°РїСѓСЃРєР°С‚СЊ РїСЂРёР»РѕР¶РµРЅРёСЏ Рё РѕС‚РїСЂР°РІР»СЏС‚СЊ СЃРѕРѕР±С‰РµРЅРёСЏ РЅР° СЌС‚РѕРј СѓСЃС‚СЂРѕР№СЃС‚РІРµ Рё РЅР°РѕР±РѕСЂРѕС‚ (С‚РѕР»СЊРєРѕ РґР»СЏ С‚РµРєСѓС‰РµРіРѕ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ)
 	Set-ItemProperty -Path 'HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\CDP' -Name 'RomeSdkChannelUserAuthzPolicy' -Type DWord 0
-	# Включить планирование графического процессора с аппаратным ускорением
+	# Р’РєР»СЋС‡РёС‚СЊ РїР»Р°РЅРёСЂРѕРІР°РЅРёРµ РіСЂР°С„РёС‡РµСЃРєРѕРіРѕ РїСЂРѕС†РµСЃСЃРѕСЂР° СЃ Р°РїРїР°СЂР°С‚РЅС‹Рј СѓСЃРєРѕСЂРµРЅРёРµРј
 	Set-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\GraphicsDrivers' -Name 'HwSchMode' -Type DWord 2
-	# Отключить автоматическую установку рекомендованных приложений (только для текущего пользователя)
+	# РћС‚РєР»СЋС‡РёС‚СЊ Р°РІС‚РѕРјР°С‚РёС‡РµСЃРєСѓСЋ СѓСЃС‚Р°РЅРѕРІРєСѓ СЂРµРєРѕРјРµРЅРґРѕРІР°РЅРЅС‹С… РїСЂРёР»РѕР¶РµРЅРёР№ (С‚РѕР»СЊРєРѕ РґР»СЏ С‚РµРєСѓС‰РµРіРѕ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ)
 	Set-ItemProperty -Path 'HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\ContentDeliveryManager' -Name 'SilentInstalledAppsEnabled' -Type DWord 0
-	# Не позволять веб-сайтам предоставлять местную информацию за счет доступа к списку языков (только для текущего пользователя)
+	# РќРµ РїРѕР·РІРѕР»СЏС‚СЊ РІРµР±-СЃР°Р№С‚Р°Рј РїСЂРµРґРѕСЃС‚Р°РІР»СЏС‚СЊ РјРµСЃС‚РЅСѓСЋ РёРЅС„РѕСЂРјР°С†РёСЋ Р·Р° СЃС‡РµС‚ РґРѕСЃС‚СѓРїР° Рє СЃРїРёСЃРєСѓ СЏР·С‹РєРѕРІ (С‚РѕР»СЊРєРѕ РґР»СЏ С‚РµРєСѓС‰РµРіРѕ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ)
 	Set-ItemProperty -Path 'HKCU:\Control Panel\International\User Profile' -Name 'HttpAcceptLanguageOptOut' -Type DWord 1
-	# Не предлагать персонализированные возможности, основанные на выбранном параметре диагностических данных (только для текущего пользователя)
+	# РќРµ РїСЂРµРґР»Р°РіР°С‚СЊ РїРµСЂСЃРѕРЅР°Р»РёР·РёСЂРѕРІР°РЅРЅС‹Рµ РІРѕР·РјРѕР¶РЅРѕСЃС‚Рё, РѕСЃРЅРѕРІР°РЅРЅС‹Рµ РЅР° РІС‹Р±СЂР°РЅРЅРѕРј РїР°СЂР°РјРµС‚СЂРµ РґРёР°РіРЅРѕСЃС‚РёС‡РµСЃРєРёС… РґР°РЅРЅС‹С… (С‚РѕР»СЊРєРѕ РґР»СЏ С‚РµРєСѓС‰РµРіРѕ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ)
 	Set-ItemProperty -Path 'HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Privacy' -Name 'TailoredExperiencesWithDiagnosticDataEnabled' -Type DWord 0
-	# Использовать кнопку PRINT SCREEN, чтобы запустить функцию создания фрагмента экрана (только для текущего пользователя)
+	# РСЃРїРѕР»СЊР·РѕРІР°С‚СЊ РєРЅРѕРїРєСѓ PRINT SCREEN, С‡С‚РѕР±С‹ Р·Р°РїСѓСЃС‚РёС‚СЊ С„СѓРЅРєС†РёСЋ СЃРѕР·РґР°РЅРёСЏ С„СЂР°РіРјРµРЅС‚Р° СЌРєСЂР°РЅР° (С‚РѕР»СЊРєРѕ РґР»СЏ С‚РµРєСѓС‰РµРіРѕ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ)
 	Set-ItemProperty -Path 'HKCU:\Control Panel\Keyboard' -Name 'PrintScreenKeyForSnippingEnabled' -Type DWord 1
-	# Не получать советы, подсказки и рекомендации при использованию Windows (только для текущего пользователя)
+	# РќРµ РїРѕР»СѓС‡Р°С‚СЊ СЃРѕРІРµС‚С‹, РїРѕРґСЃРєР°Р·РєРё Рё СЂРµРєРѕРјРµРЅРґР°С†РёРё РїСЂРё РёСЃРїРѕР»СЊР·РѕРІР°РЅРёСЋ Windows (С‚РѕР»СЊРєРѕ РґР»СЏ С‚РµРєСѓС‰РµРіРѕ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ)
 	Set-ItemProperty -Path 'HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\ContentDeliveryManager' -Name 'SubscribedContent-338389Enabled' -Type DWord 0
-	# Не показывать рекомендуемое содержимое в приложении "Параметры" (только для текущего пользователя)
+	# РќРµ РїРѕРєР°Р·С‹РІР°С‚СЊ СЂРµРєРѕРјРµРЅРґСѓРµРјРѕРµ СЃРѕРґРµСЂР¶РёРјРѕРµ РІ РїСЂРёР»РѕР¶РµРЅРёРё "РџР°СЂР°РјРµС‚СЂС‹" (С‚РѕР»СЊРєРѕ РґР»СЏ С‚РµРєСѓС‰РµРіРѕ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ)
 	Set-ItemProperty -Path 'HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\ContentDeliveryManager' -Name 'SubscribedContent-338393Enabled' -Type DWord 0
 	Set-ItemProperty -Path 'HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\ContentDeliveryManager' -Name 'SubscribedContent-353694Enabled' -Type DWord 0
 	Set-ItemProperty -Path 'HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\ContentDeliveryManager' -Name 'SubscribedContent-353696Enabled' -Type DWord 0
-	# Заменить командную строку оболочкой Windows PowerShell
+	# Р—Р°РјРµРЅРёС‚СЊ РєРѕРјР°РЅРґРЅСѓСЋ СЃС‚СЂРѕРєСѓ РѕР±РѕР»РѕС‡РєРѕР№ Windows PowerShell
 	Set-ItemProperty -Path 'HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced' -Name 'DontUsePowerShellOnWinX' -Type DWord 1
-	# Скрыть папку "Объемные объекты" из "Этот компьютер" и из панели быстрого доступа (только для текущего пользователя)
+	# РЎРєСЂС‹С‚СЊ РїР°РїРєСѓ "РћР±СЉРµРјРЅС‹Рµ РѕР±СЉРµРєС‚С‹" РёР· "Р­С‚РѕС‚ РєРѕРјРїСЊСЋС‚РµСЂ" Рё РёР· РїР°РЅРµР»Рё Р±С‹СЃС‚СЂРѕРіРѕ РґРѕСЃС‚СѓРїР° (С‚РѕР»СЊРєРѕ РґР»СЏ С‚РµРєСѓС‰РµРіРѕ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ)
 	if (-not (Test-Path -Path 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{31C0DD25-9439-4F12-BF41-7FF4EDA38722}\PropertyBag')) {
 		New-Item -Path 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{31C0DD25-9439-4F12-BF41-7FF4EDA38722}\PropertyBag' -Force
 	} Set-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{31C0DD25-9439-4F12-BF41-7FF4EDA38722}\PropertyBag' -Name 'ThisPCPolicy' -Type String 'Hide'
-	# Нe дoбaвлять "- яpлык" к имени coздaвaeмых яpлыков (только для текущего пользователя)
+	# Рќe РґoР±aРІР»СЏС‚СЊ "- СЏpР»С‹Рє" Рє РёРјРµРЅРё coР·РґaРІaeРјС‹С… СЏpР»С‹РєРѕРІ (С‚РѕР»СЊРєРѕ РґР»СЏ С‚РµРєСѓС‰РµРіРѕ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ)
 	if (-not (Test-Path -Path 'HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\NamingTemplates')) {
 		New-Item -Path 'HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\NamingTemplates' -Force
 	} Set-ItemProperty -Path 'HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\NamingTemplates' -Name 'ShortcutNameTemplate' -Type String '%s.lnk'
-	# Просмотр иконок Панели управления как: мелкие значки (только для текущего пользователя)
+	# РџСЂРѕСЃРјРѕС‚СЂ РёРєРѕРЅРѕРє РџР°РЅРµР»Рё СѓРїСЂР°РІР»РµРЅРёСЏ РєР°Рє: РјРµР»РєРёРµ Р·РЅР°С‡РєРё (С‚РѕР»СЊРєРѕ РґР»СЏ С‚РµРєСѓС‰РµРіРѕ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ)
 	if (-not (Test-Path -Path HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\ControlPanel)) {
 		New-Item -Path HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\ControlPanel -Force
 	} Set-ItemProperty -Path 'HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\ControlPanel' -Name 'AllItemsIconView' -Type DWord 1
 	Set-ItemProperty -Path 'HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\ControlPanel' -Name 'PropertyType' -Type DWord 1
-	# Изменить частоту формирования отзывов на "Никогда" для текущего пользователя
+	# РР·РјРµРЅРёС‚СЊ С‡Р°СЃС‚РѕС‚Сѓ С„РѕСЂРјРёСЂРѕРІР°РЅРёСЏ РѕС‚Р·С‹РІРѕРІ РЅР° "РќРёРєРѕРіРґР°" РґР»СЏ С‚РµРєСѓС‰РµРіРѕ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ
 	if (-not (Test-Path -Path HKCU:\SOFTWARE\Microsoft\Siuf\Rules)) {
 		New-Item -Path HKCU:\SOFTWARE\Microsoft\Siuf\Rules -Force
 	} Set-ItemProperty -Path 'HKCU:\SOFTWARE\Microsoft\Siuf\Rules' -Name 'NumberOfSIUFInPeriod' -Type DWord 0
-	# Не разрешать приложениям использовать идентификатор рекламы (только для текущего пользователя)
+	# РќРµ СЂР°Р·СЂРµС€Р°С‚СЊ РїСЂРёР»РѕР¶РµРЅРёСЏРј РёСЃРїРѕР»СЊР·РѕРІР°С‚СЊ РёРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ СЂРµРєР»Р°РјС‹ (С‚РѕР»СЊРєРѕ РґР»СЏ С‚РµРєСѓС‰РµРіРѕ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ)
 	if (-not (Test-Path HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\AdvertisingInfo)) {
 		New-Item -Path HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\AdvertisingInfo -Force
 	} Set-ItemProperty -Path 'HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\AdvertisingInfo' -Name 'Enabled' -Type DWord 0
-	# Не предлагать способы завершения настройки устройства для максимально эффективного использования Windows (только для текущего пользователя)
+	# РќРµ РїСЂРµРґР»Р°РіР°С‚СЊ СЃРїРѕСЃРѕР±С‹ Р·Р°РІРµСЂС€РµРЅРёСЏ РЅР°СЃС‚СЂРѕР№РєРё СѓСЃС‚СЂРѕР№СЃС‚РІР° РґР»СЏ РјР°РєСЃРёРјР°Р»СЊРЅРѕ СЌС„С„РµРєС‚РёРІРЅРѕРіРѕ РёСЃРїРѕР»СЊР·РѕРІР°РЅРёСЏ Windows (С‚РѕР»СЊРєРѕ РґР»СЏ С‚РµРєСѓС‰РµРіРѕ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ)
 	if (-not (Test-Path HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\UserProfileEngagement)) {
 		New-Item -Path HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\UserProfileEngagement -Force
 	} Set-ItemProperty -Path 'HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\UserProfileEngagement' -Name 'ScoobeSystemSettingEnabled' -Type DWord 0
-	# Установить уровень сбора диагностических сведений ОС на "Минимальный"
+	# РЈСЃС‚Р°РЅРѕРІРёС‚СЊ СѓСЂРѕРІРµРЅСЊ СЃР±РѕСЂР° РґРёР°РіРЅРѕСЃС‚РёС‡РµСЃРєРёС… СЃРІРµРґРµРЅРёР№ РћРЎ РЅР° "РњРёРЅРёРјР°Р»СЊРЅС‹Р№"
 	if (Get-WindowsEdition -Online | Where-Object -FilterScript {$_.Edition -like "Enterprise*" -or $_.Edition -eq "Education"}) {
-		# "Безопасность"
+		# "Р‘РµР·РѕРїР°СЃРЅРѕСЃС‚СЊ"
 		Set-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\DataCollection' -Name 'AllowTelemetry' -Type DWord 0
 		
 	} else {
-		# "Базовая настройка"
+		# "Р‘Р°Р·РѕРІР°СЏ РЅР°СЃС‚СЂРѕР№РєР°"
 		Set-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\DataCollection' -Name 'AllowTelemetry' -Type DWord 1
 	}
-	# Отключить отчеты об ошибках Windows для текущего пользователя
+	# РћС‚РєР»СЋС‡РёС‚СЊ РѕС‚С‡РµС‚С‹ РѕР± РѕС€РёР±РєР°С… Windows РґР»СЏ С‚РµРєСѓС‰РµРіРѕ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ
 	if ((Get-WindowsEdition -Online).Edition -notmatch "Core*") {
 		Get-ScheduledTask -TaskName QueueReporting | Disable-ScheduledTask
 		Set-ItemProperty -Path 'HKCU:\SOFTWARE\Microsoft\Windows\Windows Error Reporting' -Name 'Disabled' -Type DWord 1
 	}
 }
 
-# Оптимизация для систем установленных на SSD;
+# РћРїС‚РёРјРёР·Р°С†РёСЏ РґР»СЏ СЃРёСЃС‚РµРј СѓСЃС‚Р°РЅРѕРІР»РµРЅРЅС‹С… РЅР° SSD;
 Function f_ssd_settings {
 	# get-help Disable-ComputerRestore -examples
-	# Отключаем защиту системы для дисков "C:\","D:\"
+	# РћС‚РєР»СЋС‡Р°РµРј Р·Р°С‰РёС‚Сѓ СЃРёСЃС‚РµРјС‹ РґР»СЏ РґРёСЃРєРѕРІ "C:\","D:\"
 	Disable-ComputerRestore "C:\", "D:\"
-	# Удалить все точки восстановления на всех дисках
+	# РЈРґР°Р»РёС‚СЊ РІСЃРµ С‚РѕС‡РєРё РІРѕСЃСЃС‚Р°РЅРѕРІР»РµРЅРёСЏ РЅР° РІСЃРµС… РґРёСЃРєР°С…
 	vssadmin delete shadows /all /quiet
-	# Отключение файла подкачки
+	# РћС‚РєР»СЋС‡РµРЅРёРµ С„Р°Р№Р»Р° РїРѕРґРєР°С‡РєРё
 	wmic computersystem set AutomaticManagedPagefile=False
 	wmic pagefileset delete
-	# Отключение гибернации
+	# РћС‚РєР»СЋС‡РµРЅРёРµ РіРёР±РµСЂРЅР°С†РёРё
 	powercfg -h off
-	# Отключение служб Superfetch и поиска Windows
+	# РћС‚РєР»СЋС‡РµРЅРёРµ СЃР»СѓР¶Р± Superfetch Рё РїРѕРёСЃРєР° Windows
 	#Get-Service -Name SysMain | Stop-Service -Force
 	#Get-Service -Name SysMain | Set-Service -StartupType Disabled
 	Get-Service -Name WSearch | Stop-Service -Force
 	Get-Service -Name WSearch | Set-Service -StartupType Disabled
-	# Отключение Prefetch и Superfetch
+	# РћС‚РєР»СЋС‡РµРЅРёРµ Prefetch Рё Superfetch
 	Set-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management\PrefetchParameters' -Name 'EnablePrefetcher' -Type DWord 0
 	Set-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management\PrefetchParameters' -Name 'EnableSuperfetch' -Type DWord 0
-	# Отключение ClearPageFileAtShutdown и LargeSystemCache
+	# РћС‚РєР»СЋС‡РµРЅРёРµ ClearPageFileAtShutdown Рё LargeSystemCache
 	Set-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management' -Name 'ClearPageFileAtShutdown' -Type DWord 0
 	Set-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management' -Name 'LargeSystemCache' -Type DWord 0
 }
 
-# Удалить OneDrive;
+# РЈРґР°Р»РёС‚СЊ OneDrive;
 function f_remove_onedrive
 {
 	[string]$UninstallString = Get-Package -Name "Microsoft OneDrive" -ProviderName Programs -ErrorAction Ignore | ForEach-Object -Process {$_.Meta.Attributes["UninstallString"]}
@@ -326,7 +329,7 @@ function f_remove_onedrive
 		Stop-Process -Name OneDriveSetup -Force -ErrorAction Ignore
 		Stop-Process -Name FileCoAuth -Force -ErrorAction Ignore
 
-		# Получаем ссылку на OneDriveSetup.exe и его аргумент(ы)
+		# РџРѕР»СѓС‡Р°РµРј СЃСЃС‹Р»РєСѓ РЅР° OneDriveSetup.exe Рё РµРіРѕ Р°СЂРіСѓРјРµРЅС‚(С‹)
 		[string[]]$OneDriveSetup = ($UninstallString -Replace("\s*/",",/")).Split(",").Trim()
 		if ($OneDriveSetup.Count -eq 2)
 		{
@@ -337,7 +340,7 @@ function f_remove_onedrive
 			Start-Process -FilePath $OneDriveSetup[0] -ArgumentList $OneDriveSetup[1..2] -Wait
 		}
 
-		# Получаем путь до папки пользователя OneDrive
+		# РџРѕР»СѓС‡Р°РµРј РїСѓС‚СЊ РґРѕ РїР°РїРєРё РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ OneDrive
 		$OneDriveUserFolder = Get-ItemPropertyValue -Path HKCU:\Environment -Name OneDrive
 		if ((Get-ChildItem -Path $OneDriveUserFolder | Measure-Object).Count -eq 0)
 		{
@@ -357,17 +360,17 @@ function f_remove_onedrive
 		Remove-Item -Path $env:SystemDrive\OneDriveTemp -Recurse -Force -ErrorAction Ignore
 		Unregister-ScheduledTask -TaskName *OneDrive* -Confirm:$false
 
-		# Получаем путь до папки OneDrive
+		# РџРѕР»СѓС‡Р°РµРј РїСѓС‚СЊ РґРѕ РїР°РїРєРё OneDrive
 		$OneDriveFolder = Split-Path -Path (Split-Path -Path $OneDriveSetup[0] -Parent)
 
-		# Сохранить все открытые папки, чтобы восстановить их после перезапуска проводника
+		# РЎРѕС…СЂР°РЅРёС‚СЊ РІСЃРµ РѕС‚РєСЂС‹С‚С‹Рµ РїР°РїРєРё, С‡С‚РѕР±С‹ РІРѕСЃСЃС‚Р°РЅРѕРІРёС‚СЊ РёС… РїРѕСЃР»Рµ РїРµСЂРµР·Р°РїСѓСЃРєР° РїСЂРѕРІРѕРґРЅРёРєР°
 		Clear-Variable -Name OpenedFolders -Force -ErrorAction Ignore
 		$OpenedFolders = {(New-Object -ComObject Shell.Application).Windows() | ForEach-Object -Process {$_.Document.Folder.Self.Path}}.Invoke()
 
-		# Завершить процесс проводника
+		# Р—Р°РІРµСЂС€РёС‚СЊ РїСЂРѕС†РµСЃСЃ РїСЂРѕРІРѕРґРЅРёРєР°
 		TASKKILL /F /IM explorer.exe
 
-		# Попытка разрегистрировать FileSyncShell64.dll и удалить
+		# РџРѕРїС‹С‚РєР° СЂР°Р·СЂРµРіРёСЃС‚СЂРёСЂРѕРІР°С‚СЊ FileSyncShell64.dll Рё СѓРґР°Р»РёС‚СЊ
 		$FileSyncShell64dlls = Get-ChildItem -Path "$OneDriveFolder\*\amd64\FileSyncShell64.dll" -Force
 		foreach ($FileSyncShell64dll in $FileSyncShell64dlls.FullName)
 		{
@@ -381,7 +384,7 @@ function f_remove_onedrive
 			}
 		}
 
-		# Восстановляем закрытые папки
+		# Р’РѕСЃСЃС‚Р°РЅРѕРІР»СЏРµРј Р·Р°РєСЂС‹С‚С‹Рµ РїР°РїРєРё
 		Start-Process -FilePath explorer
 		foreach ($OpenedFolder in $OpenedFolders)
 		{
@@ -398,7 +401,7 @@ function f_remove_onedrive
 	}
 }
 
-# Выполнить очистку папки WinSxS | Очистка и сжатие старых обновлений;
+# Р’С‹РїРѕР»РЅРёС‚СЊ РѕС‡РёСЃС‚РєСѓ РїР°РїРєРё WinSxS | РћС‡РёСЃС‚РєР° Рё СЃР¶Р°С‚РёРµ СЃС‚Р°СЂС‹С… РѕР±РЅРѕРІР»РµРЅРёР№;
 Function f_WinSxS {
 	Dism.exe /Online /Cleanup-Image /StartComponentCleanup
 }
@@ -425,16 +428,16 @@ Function f_app_installer {
 		"Microsoft.VC++2015-2019Redist-x64"
 	)
 	ForEach ($winget in $wingets) {
-		echo "Установка приложения: $winget"
+		echo "РЈСЃС‚Р°РЅРѕРІРєР° РїСЂРёР»РѕР¶РµРЅРёСЏ: $winget"
 		winget install $winget
 	}
 }
 
-# Цикл главного меню;
+# Р¦РёРєР» РіР»Р°РІРЅРѕРіРѕ РјРµРЅСЋ;
 do
 {
 	Show-Menu
-	$input = Read-Host " - Выбор"
+	$input = Read-Host " - Р’С‹Р±РѕСЂ"
 	switch ($input)
 	{
 		'1' {
