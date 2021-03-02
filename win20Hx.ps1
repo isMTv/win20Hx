@@ -111,10 +111,16 @@ Function f_disable_components {
 # Отключить обновления Windows;
 Function f_disable_winupdate {
 	$services = @(
-		# Служба оркестратора обновлений
-		"UsoSvc"
 		# Центр обновления Windows
 		"wuauserv"
+		# Оптимизация доставки
+		"DoSvc"
+		# Служба Medic центра обновления Windows
+		"WaaSMedicSvc"
+		# Служба оркестратора обновлений
+		"UsoSvc"
+		# Фоновая интеллектуальная служба передачи (BITS)
+		"BITS"
 	)
 	ForEach ($service in $services) {
 		echo "Остановка службы: $service"
@@ -122,6 +128,8 @@ Function f_disable_winupdate {
 		echo "Отключение службы: $service"
 		Get-Service -Name $service | Set-Service -StartupType Disabled
 	}
+	# Очищаем содержимое папки со скачанными обновлениями
+	Get-ChildItem -Path "C:\Windows\SoftwareDistribution" | Remove-Item -Recurse
 	$ScheduledTaskList = @(
 		# WindowsUpdate
 		"Scheduled Start"
@@ -133,7 +141,6 @@ Function f_disable_winupdate {
 	ICACLS "C:\Windows\System32\Tasks\Microsoft\Windows\UpdateOrchestrator\Schedule Scan" /grant:r Администраторы:M
 	ICACLS "C:\Windows\System32\Tasks\Microsoft\Windows\UpdateOrchestrator\Schedule Scan Static Task" /grant:r Администраторы:M
 	Get-ScheduledTask -TaskName $ScheduledTaskList | Disable-ScheduledTask
-	
 }
 
 # Удалить встроенные приложения из магазина Windows Store;
@@ -306,8 +313,8 @@ Function f_ssd_settings {
 	# Отключение гибернации
 	powercfg -h off
 	# Отключение служб Superfetch и поиска Windows
-	#Get-Service -Name SysMain | Stop-Service -Force
-	#Get-Service -Name SysMain | Set-Service -StartupType Disabled
+	Get-Service -Name SysMain | Stop-Service -Force
+	Get-Service -Name SysMain | Set-Service -StartupType Disabled
 	Get-Service -Name WSearch | Stop-Service -Force
 	Get-Service -Name WSearch | Set-Service -StartupType Disabled
 	# Отключение Prefetch и Superfetch
